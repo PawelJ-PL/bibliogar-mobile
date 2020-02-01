@@ -11,7 +11,11 @@ import {
 import UsersApi, {UserRegistrationStatus} from "../api/UsersApi";
 import {combineEpics, Epic} from "redux-observable";
 import {AppState} from "../../../common/store";
-import {filter, map} from "rxjs/operators";
+import {filter, ignoreElements, map, mergeMap, tap} from "rxjs/operators";
+import AsyncStorage from '@react-native-community/async-storage';
+import {EMPTY, from, of} from "rxjs";
+
+const USER_DATA_STORAGE_KEY = 'userData';
 
 const loginEpic = createEpic<{ email: string, password: string }, { csrfToken: string, user: User } | null, Error>(performLoginAction, params => UsersApi.login(params.email, params.password));
 const fetchUserDataEpic = createEpic<void, User, Error>(fetchUserDataAction, () => UsersApi.getCurrentUser());
@@ -37,4 +41,33 @@ const updateUserDataOnUpdateActionSuccess: Epic<any, any, AppState> = (action$) 
             map(a => fetchUserDataAction.done({params: undefined, result: a.payload.result}))
         );
 
-export const usersEpics = combineEpics(loginEpic, fetchUserDataEpic, registerNewUserEpic, signUpConfirmationEpic, requestPasswordResetEpic, resetPasswordEpic, refreshUserDataEpic, updateUserOnRefreshSuccess, updateUserDataEpic, updateUserDataOnUpdateActionSuccess, changePasswordEpic);
+const saveUserEpic: Epic<any, any, AppState> = action$ =>
+    action$.pipe(
+        filter(fetchUserDataAction.done.match),
+        tap(a => AsyncStorage.setItem(USER_DATA_STORAGE_KEY, JSON.stringify(a.payload.result))),
+        ignoreElements()
+    );
+
+const fallbackToSavedUserEpic: Epic<any, any, AppState> = action$ => action$
+    .pipe(
+        filter(fetchUserDataAction.failed.match),
+        mergeMap(
+            () =>
+                from(AsyncStorage.getItem(USER_DATA_STORAGE_KEY)).pipe(
+                    mergeMap(result => {
+                        if (result) {
+                            try {
+                                const userData = JSON.parse(result) as User;
+                                return of(fetchUserDataAction.done({params: undefined, result: userData}))
+                            } catch (e) {
+                                return EMPTY
+                            }
+                        } else {
+                            return EMPTY
+                        }
+                    })
+                )
+        )
+    );
+
+export const usersEpics = combineEpics(loginEpic, fetchUserDataEpic, registerNewUserEpic, signUpConfirmationEpic, requestPasswordResetEpic, resetPasswordEpic, refreshUserDataEpic, updateUserOnRefreshSuccess, updateUserDataEpic, updateUserDataOnUpdateActionSuccess, changePasswordEpic, saveUserEpic, fallbackToSavedUserEpic);
