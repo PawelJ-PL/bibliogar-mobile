@@ -10,7 +10,7 @@ import {createEpic} from "../../../common/store/async/AsyncActionEpicCreator";
 import {DeviceDescription} from "../types/DeviceDescription";
 import {combineEpics, Epic} from "redux-observable";
 import {AppState} from "../../../common/store";
-import {filter, map, mergeMap} from "rxjs/operators";
+import {filter, ignoreElements, map, mergeMap, tap} from "rxjs/operators";
 import {fetchUserDataAction, performLoginAction} from "../../user/store/Actions";
 import {getBrand, getDeviceId, getDeviceName, getUniqueId} from "react-native-device-info";
 import {from} from "rxjs";
@@ -68,9 +68,16 @@ const resetUnregisterStatusOnTokenRemove: Epic<any, any, AppState> = action$ =>
             map(() => resetUnregisterDeviceAction())
         );
 
+const clearLocalStorageOnUnregisterEpic: Epic<any, any, AppState> = action$ => action$
+    .pipe(
+        filter(unregisterDeviceAction.done.match),
+        tap(() => AsyncStorage.getAllKeys().then(keys => AsyncStorage.multiRemove(keys))),
+        ignoreElements()
+    );
+
 const saveApiKeyEpic = createEpic<string, void, Error>(saveApiKeyAction, params => AsyncStorage.setItem(API_TOKEN_STORAGE_KEY, params));
 const resetApiKeyEpic = createEpic<void, void, Error>(resetApiKeyAction, () => AsyncStorage.removeItem(API_TOKEN_STORAGE_KEY));
 const registerDeviceEpic = createEpic<{ uniqueId: string, deviceDescription: DeviceDescription, csrfToken: string }, string, Error>(registerDeviceAction, params => DevicesApi.registerDevice(params.uniqueId, params.deviceDescription, params.csrfToken));
 const unregisterDeviceEpic = createEpic<void, void, Error>(unregisterDeviceAction, () => DevicesApi.unregisterCurrentDevice());
 
-export const devicesEpics = combineEpics(checkApiCompatibilityEpic, loadApiKeyEpic, saveKeyOnRegistrationEpic, registerOnLoginSuccessEpic, saveApiKeyEpic, resetApiKeyEpic, registerDeviceEpic, unregisterDeviceEpic, fetchUserDataOnUnregisterSuccessEpic, resetUnregisterStatusOnTokenRemove);
+export const devicesEpics = combineEpics(checkApiCompatibilityEpic, loadApiKeyEpic, saveKeyOnRegistrationEpic, registerOnLoginSuccessEpic, saveApiKeyEpic, resetApiKeyEpic, registerDeviceEpic, unregisterDeviceEpic, clearLocalStorageOnUnregisterEpic, fetchUserDataOnUnregisterSuccessEpic, resetUnregisterStatusOnTokenRemove);

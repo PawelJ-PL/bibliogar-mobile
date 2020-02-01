@@ -10,6 +10,8 @@ import FatalErrorScreen from "../FatalErrorScreen";
 import {fetchUserDataAction} from "../../../domain/user/store/Actions";
 import {NavigationSwitchScreenProps} from "react-navigation";
 import {OperationStatus} from "../../store/async/AsyncOperationResult";
+import {NotLoggedIn} from "../../api/Errors";
+import Toast from "react-native-root-toast";
 
 type MainNavigationSelectionProps = ReturnType<typeof mapDispatchToProps> & ReturnType<typeof mapStateToProps> & NavigationSwitchScreenProps
 
@@ -44,12 +46,17 @@ const MainNavigationSelection: React.FC<MainNavigationSelectionProps> = (props) 
         if (props.userDataStatus.data) {
             props.navigation.navigate('app')
         }
+        if (props.userDataStatus.error && !(props.userDataStatus.error instanceof NotLoggedIn)) {
+            Toast.show('Błąd w trakcie pobierania danych użytkownika')
+        }
     }, [props.userDataStatus]);
 
     if (props.isApiCompatible === false) {
         return <FatalErrorScreen message='Obecna wersja aplikacji nie jest wspierana. Konieczna jest aktualizacja'/>
     } else if (props.apiKeyStatus.error) {
         return <FatalErrorScreen message='Nie można odczytać klucza API. Spróbuj ponownie później' />
+    } else if (props.userDataStatus.error && !(props.userDataStatus.error instanceof NotLoggedIn)) {
+        return <FatalErrorScreen message='Nie można pobrać danych użytkownika' />
     } else {
         return <MainLoader />
     }
