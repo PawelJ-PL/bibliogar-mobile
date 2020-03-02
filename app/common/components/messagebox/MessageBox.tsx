@@ -16,7 +16,6 @@ const MessageBox: React.FC<MessageBoxProps> = ({visible, message, type}) => {
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
         padding: 15,
         margin: 5,
         borderRadius: 7,

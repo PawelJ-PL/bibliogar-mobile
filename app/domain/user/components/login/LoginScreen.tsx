@@ -4,12 +4,15 @@ import LoginForm from "./LoginForm";
 import {Button} from "react-native-elements";
 
 import Logo from '../../../../../resources/logo.png'
-import {NavigationStackScreenComponent, NavigationStackScreenProps} from "react-navigation-stack";
+import {StackNavigationProp} from '@react-navigation/stack'
 import {info, success} from "../../../../common/styles/Colors";
+import {AuthStackParamProps} from "../../../../common/components/navigation/AuthStack";
 
-type LoginScreenProps = NavigationStackScreenProps
+type LoginScreenProps = {
+    navigation: StackNavigationProp<AuthStackParamProps, 'loginScreen'>
+}
 
-const LoginScreen: React.FC<LoginScreenProps> & NavigationStackScreenComponent = (props) => {
+const LoginScreen: React.FC<LoginScreenProps> = (props) => {
     return (
         <View style={styles.page}>
             <View style={styles.header}>
@@ -32,10 +35,6 @@ const LoginScreen: React.FC<LoginScreenProps> & NavigationStackScreenComponent =
             </View>
         </View>
     )
-};
-
-LoginScreen.navigationOptions = {
-    headerShown: false
 };
 
 const styles = StyleSheet.create({

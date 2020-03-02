@@ -1,7 +1,7 @@
 import {brand} from "./Colors";
-import {NavigationStackOptions} from "react-navigation-stack";
+import {StackNavigationOptions} from "@react-navigation/stack";
 
-const commonNavigationOptions: NavigationStackOptions = {
+const commonNavigationOptions: StackNavigationOptions = {
     headerStyle: {
         backgroundColor: brand,
     },

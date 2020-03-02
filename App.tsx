@@ -4,6 +4,7 @@ import {Provider} from "react-redux";
 import store from "./app/common/store"
 import 'react-native-gesture-handler'
 import { enableScreens } from 'react-native-screens';
+import 'moment/locale/pl';
 
 const App = () => {
     enableScreens();

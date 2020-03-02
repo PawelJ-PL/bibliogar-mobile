@@ -9,16 +9,17 @@ import MessageBox from "../../../../common/components/messagebox/MessageBox";
 import OperationErrorMessageBox from "../../../../common/components/messagebox/OperationErrorMessageBox";
 import {OperationStatus} from "../../../../common/store/async/AsyncOperationResult";
 import Toast from 'react-native-root-toast';
-import {NavigationStackScreenProps} from "react-navigation-stack";
-import {NavigationScreenComponent} from "react-navigation";
 import SimpleFormStyle from "../password_reset/SimpleFormStyle";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {AuthStackParamProps} from "../../../../common/components/navigation/AuthStack";
 
 type SignUpConfirmationScreenProps =
     ReturnType<typeof mapStateToProps>
-    & ReturnType<typeof mapDispatchToProps>
-    & NavigationStackScreenProps
+    & ReturnType<typeof mapDispatchToProps> & {
+    navigation: StackNavigationProp<AuthStackParamProps, 'signUpConfirmationScreen'>
+}
 
-const SignUpConfirmationScreen: React.FC<SignUpConfirmationScreenProps> & NavigationScreenComponent<{}, {}> = (props) => {
+const SignUpConfirmationScreen: React.FC<SignUpConfirmationScreenProps> = (props) => {
     const [code, setCode] = useState('');
 
     useEffect(() => {
@@ -50,10 +51,6 @@ const SignUpConfirmationScreen: React.FC<SignUpConfirmationScreenProps> & Naviga
             />
         </View>
     )
-};
-
-SignUpConfirmationScreen.navigationOptions = {
-    title: 'Potwierdzenie rejestracji'
 };
 
 const mapStateToProps = (state: AppState) => {

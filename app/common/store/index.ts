@@ -9,10 +9,19 @@ import {resetUserDataAction} from "../../domain/user/store/Actions";
 import {resetApiKeyAction} from "../../domain/device/store/Actions";
 import {devicesEpics} from "../../domain/device/store/Epics";
 import {usersEpics} from "../../domain/user/store/Epics";
+import {libraryReducers} from "../../domain/library/store/Reducers";
+import {librariesEpic} from "../../domain/library/store/Epics";
+import {loansReducer} from "../../domain/loan/store/Reducers";
+import {loansEpic} from "../../domain/loan/store/Epics";
+import {booksReducer} from "../../domain/book/store/Reducers";
+import {booksEpic} from "../../domain/book/store/Epics";
 
 const rootReducer = combineReducers({
     user: userReducer,
-    device: deviceReducer
+    device: deviceReducer,
+    libraries: libraryReducers,
+    loans: loansReducer,
+    books: booksReducer
 });
 
 const resetUserOnNotLoggedInEpic: Epic<any, any, AppState> = (action$) =>
@@ -33,7 +42,10 @@ const rootEpic = combineEpics(
     resetUserOnNotLoggedInEpic,
     resetKeyOnNotLoggedInEpic,
     usersEpics,
-    devicesEpics
+    devicesEpics,
+    librariesEpic,
+    loansEpic,
+    booksEpic
 );
 
 export type AppState = ReturnType<typeof rootReducer>

@@ -1,14 +1,14 @@
 import React from "react";
 import {ThemeProvider} from "react-native-elements";
-import MainNavigation from "./navigation/MainNavigation";
 import {AppState} from "../store";
 import {connect} from "react-redux";
-import {brand} from "../styles/Colors";
+import {brandDark} from "../styles/Colors";
+import MainNavigationSelection from "./navigation/MainNavigationSelection";
 
 const Button = {
     buttonStyle: {
         margin: 5,
-        backgroundColor: brand
+        backgroundColor: brandDark
     }
 };
 
@@ -19,7 +19,8 @@ const theme = {
 const ThemedApp: React.FC<ThemedAppProps> = (props) => {
     return (
         <ThemeProvider theme={theme}>
-            <MainNavigation key={props.navigationKey} />
+
+            <MainNavigationSelection key={props.navigationKey} />
         </ThemeProvider>
     )
 };
