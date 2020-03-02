@@ -12,7 +12,7 @@ import {OperationStatus} from "../../../../common/store/async/AsyncOperationResu
 import {UserRegistrationStatus} from "../../api/UsersApi";
 import OperationErrorMessageBox from "../../../../common/components/messagebox/OperationErrorMessageBox";
 import Toast from "react-native-root-toast";
-import {NavigationInjectedProps, withNavigation} from "react-navigation";
+import { useNavigation } from '@react-navigation/native';
 import PasswordInput from "../../../../common/components/inputs/PasswordInput";
 
 export const emailPattern = /^\S+@\S+$/;
@@ -51,10 +51,11 @@ const initialValues: FormValues = {
 type RegistrationFormProps =
     ReturnType<typeof mapStateToProps>
     & ReturnType<typeof mapDispatchToProps>
-    & NavigationInjectedProps
 
 const RegistrationForm: React.FC<RegistrationFormProps> = (props) => {
     const [registrationWarning, setRegistrationWarning] = useState<string | null>(null);
+
+    const navigation = useNavigation();
 
     useEffect(() => {
         return () => {
@@ -77,7 +78,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = (props) => {
                 case UserRegistrationStatus.Ok:
                     Toast.show('Poczekaj na email z kodem aktywacyjnym', {duration: Toast.durations.LONG});
                     setRegistrationWarning(null);
-                    props.navigation.navigate('signUpConfirmationScreen');
+                    navigation.navigate('signUpConfirmationScreen');
                     break;
                 default:
                     setRegistrationWarning(null);
@@ -167,4 +168,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(withNavigation(RegistrationForm))
+export default connect(mapStateToProps, mapDispatchToProps)(RegistrationForm)

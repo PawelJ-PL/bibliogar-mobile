@@ -9,13 +9,15 @@ import {connect} from "react-redux";
 import OperationErrorMessageBox from "../../../../common/components/messagebox/OperationErrorMessageBox";
 import {OperationStatus} from "../../../../common/store/async/AsyncOperationResult";
 import Toast from "react-native-root-toast";
-import {NavigationScreenComponent} from "react-navigation";
-import {NavigationStackScreenProps} from "react-navigation-stack";
 import SimpleFormStyle from "./SimpleFormStyle";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {AuthStackParamProps} from "../../../../common/components/navigation/AuthStack";
 
-type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & NavigationStackScreenProps
+type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & {
+    navigation: StackNavigationProp<AuthStackParamProps, 'passwordResetRequestScreen'>
+}
 
-const PasswordResetRequestScreen: React.FC<Props> & NavigationScreenComponent<{}, {}> = (props) => {
+const PasswordResetRequestScreen: React.FC<Props> = (props) => {
     const [email, setEmail] = useState('');
 
     useEffect(() => {
@@ -42,10 +44,6 @@ const PasswordResetRequestScreen: React.FC<Props> & NavigationScreenComponent<{}
             />
         </View>
     )
-};
-
-PasswordResetRequestScreen.navigationOptions = {
-    title: 'Reset hasła'
 };
 
 const mapStateToProps = (state: AppState) => {

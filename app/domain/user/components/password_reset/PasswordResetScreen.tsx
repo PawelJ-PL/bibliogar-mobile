@@ -11,13 +11,15 @@ import {resetPasswordAction, resetPasswordResetAction} from "../../store/Actions
 import OperationErrorMessageBox from "../../../../common/components/messagebox/OperationErrorMessageBox";
 import MessageBox from "../../../../common/components/messagebox/MessageBox";
 import Toast from "react-native-root-toast";
-import {NavigationStackScreenProps} from "react-navigation-stack";
 import {OperationStatus} from "../../../../common/store/async/AsyncOperationResult";
-import {NavigationScreenComponent} from "react-navigation";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {AuthStackParamProps} from "../../../../common/components/navigation/AuthStack";
 
-type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & NavigationStackScreenProps
+type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & {
+    navigation: StackNavigationProp<AuthStackParamProps, 'passwordResetScreen'>
+}
 
-const PasswordResetScreen: React.FC<Props> & NavigationScreenComponent<{}, {}> = (props) => {
+const PasswordResetScreen: React.FC<Props> = (props) => {
     const [code, setCode] = useState('');
     const [password, setPassword] = useState('');
 
@@ -46,9 +48,9 @@ const PasswordResetScreen: React.FC<Props> & NavigationScreenComponent<{}, {}> =
     )
 };
 
-PasswordResetScreen.navigationOptions = {
-    title: 'Reset hasła'
-};
+// PasswordResetScreen.navigationOptions = {
+//     title: 'Reset hasła'
+// };
 
 const styles = StyleSheet.create({
     inputContainer: {

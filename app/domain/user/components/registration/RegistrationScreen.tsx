@@ -1,9 +1,8 @@
 import React from "react";
 import {StyleSheet, View} from "react-native";
 import RegistrationForm from "./RegistrationForm";
-import {NavigationStackScreenComponent} from "react-navigation-stack";
 
-const RegistrationScreen: React.FC & NavigationStackScreenComponent = () => {
+const RegistrationScreen: React.FC = () => {
     return (
         <View style={styles.screen}>
             <View style={styles.registrationFormContainer}>
@@ -11,10 +10,6 @@ const RegistrationScreen: React.FC & NavigationStackScreenComponent = () => {
             </View>
         </View>
     )
-};
-
-RegistrationScreen.navigationOptions = {
-    title: 'Rejestracja'
 };
 
 const styles = StyleSheet.create({

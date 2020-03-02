@@ -6,9 +6,3 @@ export const AAA = () => {
         <View><Text>AAAAAAAAAAAAAAAAAAAAAAA</Text></View>
     )
 };
-
-export const BBB = () => {
-    return(
-        <View><Text>BBBBBBBBBBBBBBBBBB</Text></View>
-    )
-};
