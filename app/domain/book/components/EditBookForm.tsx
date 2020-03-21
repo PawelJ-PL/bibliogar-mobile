@@ -23,7 +23,7 @@ export type BookFormValues = {
     cover?: string | null
 }
 
-const allowedUrlPattern = /^(?:http:\/\/books\.google\.com\/books|https:\/\/covers\.openlibrary\.org\/).*$/;
+const allowedUrlPattern = /^(?:https:\/\/books\.google\.com\/books|https:\/\/covers\.openlibrary\.org\/).*$/;
 export const IsbnPattern = /^(97([89]))?\d{9}(\d|X)$/;
 
 const formSchema = yup.object().shape({
