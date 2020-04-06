@@ -1,12 +1,12 @@
 import React from "react";
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {AAA} from "./TestComponent";
 import {brand} from "../../styles/Colors";
 import {Icon, IconType} from "react-native-elements";
 import {StyleSheet, Text} from "react-native";
 import {SettingsStack} from "./panels/SettingsStack";
 import {NavigationContainer} from "@react-navigation/native";
 import {LoanStack} from "./panels/LoansStack";
+import {DashboardStack} from "./panels/DashboardStack";
 
 const generateLabel = (label: string) =>
     (props: { focused: boolean, color: string }) => props.focused ?
@@ -32,7 +32,7 @@ export const AppPanels = () => (
         <Tab.Navigator initialRouteName='hone' tabBarOptions={tabBarOptions}>
             <Tab.Screen
                 name='home'
-                component={AAA}
+                component={DashboardStack}
                 options={{
                     tabBarLabel: generateLabel('Przegląd'),
                     tabBarIcon: generateIcon('desktop-mac-dashboard', 'material-community'),
