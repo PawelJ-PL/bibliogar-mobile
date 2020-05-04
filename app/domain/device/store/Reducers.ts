@@ -4,10 +4,11 @@ import {
     loadApiKeyAction,
     registerDeviceAction,
     resetApiKeyAction, resetUnregisterDeviceAction,
-    saveApiKeyAction, unregisterDeviceAction
+    saveApiKeyAction, setNotificationTokenAction, unregisterDeviceAction
 } from "./Actions";
 import {combineReducers} from "redux";
 import {OperationStatus} from "../../../common/store/async/AsyncOperationResult";
+import {reducerWithInitialState} from "typescript-fsa-reducers";
 
 const apiCompatibilityReducer = createReducer(checkApiCompatibilityAction);
 const loadApiKeyReducer = createReducer(loadApiKeyAction)
@@ -28,11 +29,15 @@ const resetApiKeyReducer = createReducer(resetApiKeyAction);
 const registrationReducer = createReducer(registerDeviceAction);
 const unregisterReducer = createReducer(unregisterDeviceAction, resetUnregisterDeviceAction);
 
+const notificationTokenReducer = reducerWithInitialState<string | null>(null)
+    .case(setNotificationTokenAction, (_, payload) => payload)
+
 export const deviceReducer = combineReducers({
     compatibilityCheckStatus: apiCompatibilityReducer,
     loadApiKeyStatus: loadApiKeyReducer,
     saveApiKeyStatus: saveApiKeyReducer,
     resetApiKeyStatus: resetApiKeyReducer,
     registrationStatus: registrationReducer,
-    unregisterDeviceStatus: unregisterReducer
+    unregisterDeviceStatus: unregisterReducer,
+    notificationToken: notificationTokenReducer
 });

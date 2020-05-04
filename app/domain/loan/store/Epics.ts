@@ -4,7 +4,8 @@ import {createLoanAction, editLoanAction, fetchActiveLoansAction, finishLoanActi
 import LoansApi, {EditLoanReq, LoanResponse, responseToLoan} from "../api/LoansApi";
 import {combineEpics, Epic} from "redux-observable";
 import {AppState} from "../../../common/store";
-import {filter, map} from "rxjs/operators";
+import {filter, ignoreElements, map, tap} from "rxjs/operators";
+import {updateLoanNotificationsOnAction} from "../utils/notificationsRepositoryHelpers";
 
 const fetchActiveLoansEpic = createEpic<void, Loan[], Error>(fetchActiveLoansAction, () => LoansApi.fetchActiveLoans());
 const finishLoanEpic = createEpic<string, Loan, Error>(finishLoanAction, params => LoansApi.finishLoan(params));
@@ -25,6 +26,13 @@ const refreshActiveLoansOnEventsEpic: Epic<any, any, AppState> = action$ => acti
         map(() => fetchActiveLoansAction.started())
     );
 
+const updateLoanNotificationsEpic: Epic<any, any, AppState> = action$ => action$
+    .pipe(
+        filter(fetchActiveLoansAction.done.match),
+        tap(updateLoanNotificationsOnAction),
+        ignoreElements()
+    )
+
 const [saveActiveLoansEpic, loadActiveLoansEpic] = createLocalFallbackEpic(fetchActiveLoansAction, '', undefined, undefined, deserializeLoan);
 
-export const loansEpic = combineEpics(fetchActiveLoansEpic, saveActiveLoansEpic, loadActiveLoansEpic, finishLoanEpic, refreshActiveLoansOnEventsEpic, createLoanEpic, editLoanEpic);
+export const loansEpic = combineEpics(fetchActiveLoansEpic, saveActiveLoansEpic, loadActiveLoansEpic, finishLoanEpic, refreshActiveLoansOnEventsEpic, createLoanEpic, editLoanEpic, updateLoanNotificationsEpic);

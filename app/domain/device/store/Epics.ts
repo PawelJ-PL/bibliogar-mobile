@@ -15,6 +15,7 @@ import {fetchUserDataAction, performLoginAction} from "../../user/store/Actions"
 import {getBrand, getDeviceId, getDeviceName, getUniqueId} from "react-native-device-info";
 import {from} from "rxjs";
 import AsyncStorage from '@react-native-community/async-storage';
+import PushNotification from "react-native-push-notification";
 
 const API_TOKEN_STORAGE_KEY = 'apiToken';
 
@@ -38,7 +39,7 @@ const deviceData = getDeviceName().then(name => ({
         deviceName: name
     }
 }));
-const registerOnLoginSuccessEpic: Epic<any, any, AppState> = (action$, _) =>
+const registerOnLoginSuccessEpic: Epic<any, any, AppState> = (action$, state$) =>
     action$
         .pipe(
             filter(performLoginAction.done.match),
@@ -47,6 +48,7 @@ const registerOnLoginSuccessEpic: Epic<any, any, AppState> = (action$, _) =>
                 from(deviceData).pipe(
                     map(data => registerDeviceAction.started({
                         uniqueId: data.uniqueId,
+                        notificationToken: state$.value.device.notificationToken,
                         deviceDescription: data.deviceDescription,
                         csrfToken: a.payload?.result?.csrfToken || ''
                     }))
@@ -75,9 +77,20 @@ const clearLocalStorageOnUnregisterEpic: Epic<any, any, AppState> = action$ => a
         ignoreElements()
     );
 
+const removeNotificationsOnUnregisterEpic: Epic<any, any, AppState> = action$ => action$
+    .pipe(
+        filter(unregisterDeviceAction.done.match),
+        tap(() => {
+            PushNotification.cancelAllLocalNotifications()
+            PushNotification.abandonPermissions()
+            PushNotification.unregister()
+        }),
+        ignoreElements()
+    )
+
 const saveApiKeyEpic = createEpic<string, void, Error>(saveApiKeyAction, params => AsyncStorage.setItem(API_TOKEN_STORAGE_KEY, params));
 const resetApiKeyEpic = createEpic<void, void, Error>(resetApiKeyAction, () => AsyncStorage.removeItem(API_TOKEN_STORAGE_KEY));
-const registerDeviceEpic = createEpic<{ uniqueId: string, deviceDescription: DeviceDescription, csrfToken: string }, string, Error>(registerDeviceAction, params => DevicesApi.registerDevice(params.uniqueId, params.deviceDescription, params.csrfToken));
+const registerDeviceEpic = createEpic<{ uniqueId: string, notificationToken: string | null, deviceDescription: DeviceDescription, csrfToken: string }, string, Error>(registerDeviceAction, params => DevicesApi.registerDevice(params.uniqueId, params.notificationToken, params.deviceDescription, params.csrfToken));
 const unregisterDeviceEpic = createEpic<void, void, Error>(unregisterDeviceAction, () => DevicesApi.unregisterCurrentDevice());
 
-export const devicesEpics = combineEpics(checkApiCompatibilityEpic, loadApiKeyEpic, saveKeyOnRegistrationEpic, registerOnLoginSuccessEpic, saveApiKeyEpic, resetApiKeyEpic, registerDeviceEpic, unregisterDeviceEpic, clearLocalStorageOnUnregisterEpic, fetchUserDataOnUnregisterSuccessEpic, resetUnregisterStatusOnTokenRemove);
+export const devicesEpics = combineEpics(checkApiCompatibilityEpic, loadApiKeyEpic, saveKeyOnRegistrationEpic, registerOnLoginSuccessEpic, saveApiKeyEpic, resetApiKeyEpic, registerDeviceEpic, unregisterDeviceEpic, clearLocalStorageOnUnregisterEpic, fetchUserDataOnUnregisterSuccessEpic, resetUnregisterStatusOnTokenRemove, removeNotificationsOnUnregisterEpic);
