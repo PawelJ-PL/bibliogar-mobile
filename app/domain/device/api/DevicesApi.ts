@@ -13,8 +13,12 @@ export default {
                 }
             })
     },
-    registerDevice(uniqueId: string, deviceDescription: DeviceDescription, csrfToken: string): Promise<string> {
-        return client.post<{ deviceId: string, deviceApiKey: string }>('/devices', {uniqueId, deviceDescription}, {headers: {'X-Csrf-Token': csrfToken}})
+    registerDevice(uniqueId: string, notificationToken: string | null, deviceDescription: DeviceDescription, csrfToken: string): Promise<string> {
+        return client.post<{ deviceId: string, deviceApiKey: string }>('/devices', {
+            uniqueId,
+            deviceDescription,
+            notificationToken
+        }, {headers: {'X-Csrf-Token': csrfToken}})
             .then(resp => resp.data.deviceApiKey)
     },
     unregisterCurrentDevice(): Promise<void> {

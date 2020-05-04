@@ -1,7 +1,11 @@
 import React, {useEffect} from "react";
 import packageJson from "../../../../package.json"
 import {Dispatch} from "redux";
-import {checkApiCompatibilityAction, loadApiKeyAction} from "../../../domain/device/store/Actions";
+import {
+    checkApiCompatibilityAction,
+    loadApiKeyAction,
+    setNotificationTokenAction
+} from "../../../domain/device/store/Actions";
 import {connect} from "react-redux";
 import {AppState} from "../../store";
 import MainLoader from "../init/MainLoader";
@@ -13,6 +17,8 @@ import {NotLoggedIn} from "../../api/Errors";
 import Toast from "react-native-root-toast";
 import {AuthStack} from "./AuthStack";
 import {AppPanels} from "./AppPanels";
+import PushNotification from "react-native-push-notification";
+import pushNotificationHandler from '../../handlers/pushNotificationHandler'
 
 type MainNavigationSelectionProps = ReturnType<typeof mapDispatchToProps> & ReturnType<typeof mapStateToProps>
 
@@ -47,12 +53,21 @@ const MainNavigationSelection: React.FC<MainNavigationSelectionProps> = (props) 
         }
     }, [props.userDataStatus]);
 
+    useEffect(() => {
+        PushNotification.configure({
+            onRegister: ({token}) => props.setNotificationToken(token),
+            onNotification: pushNotificationHandler
+        })
+    }, [])
+
     if (props.isApiCompatible === false) {
         return <FatalErrorScreen message='Obecna wersja aplikacji nie jest wspierana. Konieczna jest aktualizacja'/>
     } else if (props.apiKeyStatus.error) {
         return <FatalErrorScreen message='Nie można odczytać klucza API. Spróbuj ponownie później' />
     } else if (props.userDataStatus.error && !(props.userDataStatus.error instanceof NotLoggedIn)) {
         return <FatalErrorScreen message='Nie można pobrać danych użytkownika' />
+    } else if (!props.notificationToken) {
+        return <MainLoader />
     } else if (props.apiKeyStatus.data === null) {
         return <AuthStack />
     } else if (props.userDataStatus.data) {
@@ -72,6 +87,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
         },
         fetchUserData() {
             dispatch(fetchUserDataAction.started())
+        },
+        setNotificationToken(token: string) {
+            dispatch(setNotificationTokenAction(token))
         }
     }
 };
@@ -81,7 +99,8 @@ const mapStateToProps = (state: AppState) => {
         apiCompatibilityError: state.device.compatibilityCheckStatus.error,
         isApiCompatible: state.device.compatibilityCheckStatus.data,
         apiKeyStatus: state.device.loadApiKeyStatus,
-        userDataStatus: state.user.userDataStatus
+        userDataStatus: state.user.userDataStatus,
+        notificationToken: state.device.notificationToken
     }
 };
 
