@@ -26,10 +26,10 @@ const refreshActiveLoansOnEventsEpic: Epic<any, any, AppState> = action$ => acti
         map(() => fetchActiveLoansAction.started())
     );
 
-const updateLoanNotificationsEpic: Epic<any, any, AppState> = action$ => action$
+const updateLoanNotificationsEpic: Epic<any, any, AppState> = (action$, state$) => action$
     .pipe(
         filter(fetchActiveLoansAction.done.match),
-        tap(updateLoanNotificationsOnAction),
+        tap(a => updateLoanNotificationsOnAction(a, state$.value)),
         ignoreElements()
     )
 
