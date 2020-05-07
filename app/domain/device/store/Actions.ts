@@ -11,3 +11,4 @@ export const resetApiKeyAction = actionCreator.async<void, void, Error>("RESET_A
 export const unregisterDeviceAction = actionCreator.async<void, void, Error>('UNREGISTER_DEVICE');
 export const resetUnregisterDeviceAction = actionCreator('RESET_UNREGISTER_DEVICE');
 export const setNotificationTokenAction = actionCreator<string>('SET_NOTIFICATION_TOKEN')
+export const torchToggleAction = actionCreator('TORCH_TOGGLE')

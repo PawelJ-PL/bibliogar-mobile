@@ -4,7 +4,7 @@ import {
     loadApiKeyAction,
     registerDeviceAction,
     resetApiKeyAction, resetUnregisterDeviceAction,
-    saveApiKeyAction, setNotificationTokenAction, unregisterDeviceAction
+    saveApiKeyAction, setNotificationTokenAction, torchToggleAction, unregisterDeviceAction
 } from "./Actions";
 import {combineReducers} from "redux";
 import {OperationStatus} from "../../../common/store/async/AsyncOperationResult";
@@ -32,6 +32,9 @@ const unregisterReducer = createReducer(unregisterDeviceAction, resetUnregisterD
 const notificationTokenReducer = reducerWithInitialState<string | null>(null)
     .case(setNotificationTokenAction, (_, payload) => payload)
 
+const torchOnReducer = reducerWithInitialState(false)
+    .case(torchToggleAction, (prevState, _) => !prevState)
+
 export const deviceReducer = combineReducers({
     compatibilityCheckStatus: apiCompatibilityReducer,
     loadApiKeyStatus: loadApiKeyReducer,
@@ -39,5 +42,6 @@ export const deviceReducer = combineReducers({
     resetApiKeyStatus: resetApiKeyReducer,
     registrationStatus: registrationReducer,
     unregisterDeviceStatus: unregisterReducer,
-    notificationToken: notificationTokenReducer
+    notificationToken: notificationTokenReducer,
+    torchOn: torchOnReducer
 });
