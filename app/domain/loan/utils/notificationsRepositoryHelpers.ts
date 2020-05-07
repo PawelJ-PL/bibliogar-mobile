@@ -7,11 +7,12 @@ import omit from "lodash/omit";
 import fromPairs from "lodash/fromPairs";
 import PushNotification from "react-native-push-notification";
 import {brandDark} from "../../../common/styles/Colors";
+import {AppState} from "../../../common/store";
 
 const LOAN_NOTIFICATIONS_REPOSITORY_STORAGE_KEY = 'loanNotifications'
 type LoanNotificationRepositoryEntry = { id: string, version: string, returnTo: number }
 
-export const updateLoanNotificationsOnAction = (action: Action<Success<void, Loan[]>>) => {
+export const updateLoanNotificationsOnAction = (action: Action<Success<void, Loan[]>>, appState?: AppState) => {
     AsyncStorage.getItem(LOAN_NOTIFICATIONS_REPOSITORY_STORAGE_KEY).then(maybeNotifications => {
         const registered: Record<string, LoanNotificationRepositoryEntry> = maybeNotifications ? JSON.parse(maybeNotifications) : {}
         const newLoans = action.payload.result.filter(loan => !Object.values(registered).map(entry => entry.id).includes(loan.id))
@@ -27,20 +28,26 @@ export const updateLoanNotificationsOnAction = (action: Action<Success<void, Loa
         const registeredWithoutRemoved: Record<string, LoanNotificationRepositoryEntry> = omit(registered, toRemove)
 
         const newEntries = fromPairs(newLoans.concat(changedLoans)
-            .map(loan => ({id: loan.id, returnTo: loan.returnTo.unix(), version: loan.version}))
-            .map(entry => [createNotification(entry.returnTo), entry]))
+            .map(loan => {
+                const maybeLibraryName = appState?.libraries.librariesStatus.data?.find(l => l.id === loan.libraryId)?.name
+                const notificationId = createNotification(loan.returnTo.unix(), maybeLibraryName)
+                const entry = {id: loan.id, returnTo: loan.returnTo.unix(), version: loan.version}
+                return [notificationId, entry]
+            }))
 
         const updatedRegistry: Record<string, LoanNotificationRepositoryEntry> = Object.assign({}, registeredWithoutRemoved, newEntries)
         return AsyncStorage.setItem(LOAN_NOTIFICATIONS_REPOSITORY_STORAGE_KEY, JSON.stringify(updatedRegistry))
     })
 }
 
-const createNotification = (returnTo: number) => {
+const createNotification = (returnTo: number, libraryName?: string | null) => {
     const notificationId = (moment().unix() + Math.floor(Math.random() * 10000)).toString(10)
     const returnToMoment = moment(returnTo * 1000)
-    const message = returnToMoment.isAfter(moment()) ? 'Zbliża się termin zwrotu' : 'Minął termin zwrotu'
+    const messageBase = returnToMoment.isAfter(moment()) ? 'Zbliża się termin zwrotu.' : 'Minął termin zwrotu.'
+    const message = libraryName ? messageBase + ' Biblioteka ' + libraryName : messageBase
     const threeDaysBeforeEnd = returnToMoment.clone().subtract(3, 'days')
     const date = threeDaysBeforeEnd.isAfter(moment()) ? threeDaysBeforeEnd.toDate() : moment().clone().add(1, 'hour').toDate()
+
     PushNotification.localNotificationSchedule({
         id: notificationId,
         color: brandDark,
