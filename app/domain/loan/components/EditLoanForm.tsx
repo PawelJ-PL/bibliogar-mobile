@@ -106,7 +106,7 @@ const EditLoanForm: React.FC<Props> = ({
                     const currentHours = now.hours()
                     const currentMinutes = now.minutes()
                     const updatedMoment = moment(d).clone().add(currentHours, "hours").add(currentMinutes, "minutes")
-                    setReturnTo(moment(updatedMoment))
+                    setReturnTo(updatedMoment)
                 }}
                 onCancel={() => setReturnToModalVisible(false)}
                 isVisible={returnToModalVisible}
