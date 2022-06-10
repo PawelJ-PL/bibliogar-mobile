@@ -1,103 +1,112 @@
-import React, {useEffect} from "react";
-import {SectionList, StyleSheet, Text, View} from "react-native";
-import userProfileSection from "../../../domain/user/components/settings/UserProfileSettingsSection";
-import {Divider} from "react-native-elements";
-import {AppState} from "../../store";
-import {OperationStatus} from "../../store/async/AsyncOperationResult";
-import {Dispatch} from "redux";
-import {refreshUserDataAction} from "../../../domain/user/store/Actions";
-import {connect} from "react-redux";
-import Toast from "react-native-root-toast";
-import Spinner from "react-native-loading-spinner-overlay";
-import LibrariesSettingsSection from "../../../domain/library/components/settings/LibrariesSettingsSection";
-import {fetchUserLibrariesAction} from "../../../domain/library/store/Actions";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {SettingsStackParamProps} from "../navigation/panels/SettingsStack";
-import {brand} from "../../styles/Colors";
+import React, { useEffect } from "react"
+import { SectionList, StyleSheet, Text, View } from "react-native"
+import userProfileSection from "../../../domain/user/components/settings/UserProfileSettingsSection"
+import { Divider } from "react-native-elements"
+import { AppState } from "../../store"
+import { OperationStatus } from "../../store/async/AsyncOperationResult"
+import { Dispatch } from "redux"
+import { refreshUserDataAction } from "../../../domain/user/store/Actions"
+import { connect } from "react-redux"
+import Toast from "react-native-root-toast"
+import Spinner from "react-native-loading-spinner-overlay"
+import LibrariesSettingsSection from "../../../domain/library/components/settings/LibrariesSettingsSection"
+import { fetchUserLibrariesAction } from "../../../domain/library/store/Actions"
+import { StackNavigationProp } from "@react-navigation/stack"
+import { SettingsStackParamProps } from "../navigation/panels/SettingsStack"
+import { brand } from "../../styles/Colors"
+import HelpSection from "./HelpSection"
 
-type Props = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & {
-    navigation: StackNavigationProp<SettingsStackParamProps, 'categories'>
-}
+type Props = ReturnType<typeof mapStateToProps> &
+    ReturnType<typeof mapDispatchToProps> & {
+        navigation: StackNavigationProp<SettingsStackParamProps, "categories">
+    }
 
 export interface SettingsSection {
-    title: string,
+    title: string
     data: Array<{
-        component: React.ComponentType,
+        component: React.ComponentType
         key: string
         keyPrefix: string
     }>
 }
 
 const sections: SettingsSection[] = [
-    {title: 'Dane', data: [{key: 'libraries', keyPrefix: 'data', component: LibrariesSettingsSection}]},
-    userProfileSection
-];
+    { title: "Dane", data: [{ key: "libraries", keyPrefix: "data", component: LibrariesSettingsSection }] },
+    userProfileSection,
+    { title: "Pomoc", data: [{ key: "privacy", keyPrefix: "help", component: HelpSection }] },
+]
 
 const renderHeader = (title: string) => (
     <View>
         <Text style={styles.headerText}>{title}</Text>
-        <Divider/>
+        <Divider />
     </View>
-);
+)
 
 const SettingsScreen: React.FC<Props> = (props) => {
     useEffect(() => {
         if (props.refreshError) {
-            Toast.show('Błąd w trakcie odświeżania ustawień')
+            Toast.show("Błąd w trakcie odświeżania ustawień")
         }
-    }, [props.refreshError]);
+    }, [props.refreshError])
 
     useEffect(() => {
         if (props.updateError) {
-            Toast.show('Błąd w trakcie zmiany ustawień')
+            Toast.show("Błąd w trakcie zmiany ustawień")
         }
-    }, [props.updateError]);
+    }, [props.updateError])
 
     useEffect(() => {
         if (props.refreshLibrariesStatus === OperationStatus.NOT_STARTED) {
-            props.refreshLibraries();
+            props.refreshLibraries()
         }
-    }, []);
+    }, [])
 
     return (
         <View style={styles.container}>
-            <Spinner visible={props.updateUserDataInProgress || props.unregisterDeviceInProgress}/>
+            <Spinner visible={props.updateUserDataInProgress || props.unregisterDeviceInProgress} />
             <SectionList
                 sections={sections}
-                renderItem={(Item) => <Item.item.component/>}
-                renderSectionHeader={({section: {title}}) => renderHeader(title)}
-                keyExtractor={i => i.keyPrefix + '_' + i.key}
+                renderItem={(Item) => <Item.item.component />}
+                renderSectionHeader={({ section: { title } }) => renderHeader(title)}
+                keyExtractor={(i) => i.keyPrefix + "_" + i.key}
                 refreshing={props.refreshInProgress}
                 onRefresh={() => {
-                    props.refreshUser();
+                    props.refreshUser()
                     props.refreshLibraries()
                 }}
             />
         </View>
     )
-};
+}
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
     },
     headerText: {
         padding: 14,
-        fontWeight: '700',
-        color: brand
-    }
-});
+        fontWeight: "700",
+        color: brand,
+    },
+})
 
 const mapStateToProps = (state: AppState) => {
     return {
         updateUserDataInProgress: state.user.updateUserDataStatus.status === OperationStatus.PENDING,
         unregisterDeviceInProgress: state.device.unregisterDeviceStatus.status === OperationStatus.PENDING,
         refreshLibrariesStatus: state.libraries.librariesStatus.status,
-        refreshInProgress: state.user.refreshUserDataStatus.status === OperationStatus.PENDING || state.libraries.librariesStatus.status === OperationStatus.PENDING,
-        refreshError: state.user.refreshUserDataStatus.status === OperationStatus.FAILED || state.libraries.librariesStatus.status === OperationStatus.FAILED,
-        updateError: state.user.updateUserDataStatus.status === OperationStatus.FAILED || state.device.unregisterDeviceStatus.status === OperationStatus.FAILED
+        refreshInProgress:
+            state.user.refreshUserDataStatus.status === OperationStatus.PENDING ||
+            state.libraries.librariesStatus.status === OperationStatus.PENDING,
+        refreshError:
+            state.user.refreshUserDataStatus.status === OperationStatus.FAILED ||
+            state.libraries.librariesStatus.status === OperationStatus.FAILED,
+        updateError:
+            state.user.updateUserDataStatus.status === OperationStatus.FAILED ||
+            state.device.unregisterDeviceStatus.status === OperationStatus.FAILED,
     }
-};
+}
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
     return {
@@ -106,8 +115,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
         },
         refreshLibraries() {
             dispatch(fetchUserLibrariesAction.started())
-        }
+        },
     }
-};
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(SettingsScreen)

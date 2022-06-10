@@ -7,7 +7,7 @@ buildscript {
         buildToolsVersion = "28.0.3"
         minSdkVersion = 16
         compileSdkVersion = 28
-        targetSdkVersion = 28
+        targetSdkVersion = 30
         googlePlayServicesVersion = "16.+"
         firebaseVersion = "17.3.4"
         firebaseMessagingVersion = "20.2.1"

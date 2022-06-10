@@ -1,7 +1,8 @@
 import React from "react";
-import {Image, StyleSheet, Text, View} from "react-native";
+import {Image, Linking, StyleSheet, Text, View} from "react-native";
 import LoginForm from "./LoginForm";
 import {Button} from "react-native-elements";
+import Config from "react-native-config";
 
 import Logo from '../../../../../resources/logo.png'
 import {StackNavigationProp} from '@react-navigation/stack'
@@ -31,6 +32,9 @@ const LoginScreen: React.FC<LoginScreenProps> = (props) => {
                 <View style={styles.linkContainer}>
                     <Text style={styles.link} onPress={() => props.navigation.navigate('signUpConfirmationScreen')}>Wpisz
                         kod aktywacji konta</Text>
+                </View>
+                <View style={styles.linkContainer}>
+                    <Text style={styles.link} onPress={() => Linking.openURL(Config.PRIVACY_POLICY_URL)}>Polityka prywatności</Text>
                 </View>
             </View>
         </View>
